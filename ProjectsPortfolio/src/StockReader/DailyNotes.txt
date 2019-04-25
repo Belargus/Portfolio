@@ -1,0 +1,66 @@
+PORTFOLIO PLAN:
+>Demonstrate knowledge of creating GUIs. 
+>Demonstrate knowledge of object-oriented programming. Polymorphism, Encapsulation, Inheritance, 
+Abstraction (Creating classes for the users and tasks)
+>Demonstrate knowledge of how to import external libraries and how to use them. 
+>Demonstrate knowledge of how to connect to an online resource (i.e. website) and parse 
+the data. 
+<Not covered here>Demonstrate knowledge of networking concepts.
+<Not covered here>Demonstrate knowledge of multithreading concepts.
+
+PROJECT PLAN:
+>Create a program that displays charts detailing the opening and closing prices of various stocks and 
+provides a small summary of the stocks' average, lowest, and highest prices.
+>The feed can be retrieved in two ways: (1) the user provides the CSVs, or (2) the program downloads the 
+CSVs through Yahoo Finance. The data is then parsed and then used in the above-mentioned charts. 
+
+
+DAY 1:
+>Created a 'StockReader' class. In this class, a method that opens a connection using the provided URL. 
+However, each attempt results in an error: HTTP 401 (unauthorized access). Research shows that the URL 
+needs to be accompanied by a 'crumb' to verify that it is not a bot. StackOverflow, Google, and YouTube 
+have yielded nothing. For the sake of progress, switched focus to parsing the data from the manually 
+downloaded csv files. Used a BufferedReader for this and used String.split() to separate the data into usable 
+parts.
+>Created the Stock class that will store the parsed data in convenient objects. Has constructor, getters, and 
+setters. Fields: date, open, high, low, close, adjClose, and volume. 
+>Created the StockReaderGUI class. Using TabbedPane so that each of the stocks will have their own tab with 
+their own chart. Selecting files will be done through accessing a MenuItem stored inside a Menu. Clicking this 
+menuitem will call the getCSVs() method that I created in the StockReader class. 
+>The getCSVs() method uses a FileChooser to navigate the user's files. Multiple files can be selected at once 
+and stored in a File[] array. When that is done, the file is stored in a HashMap<String, File> called 
+'selectedFiles'. The String stores the filename (which, thankfully, is the name of the stock index). 
+>The StockReader().convertToStock() method takes the selectedFiles hashmap and for each of the stored 
+CSVs, parses the data using BufferedReader, FileReader, and String.split. The data is stored into Stock objects 
+which are then stored into a different hashmap called stockMap. This HashMap<String, ArrayList<Stock>> 
+stores the filename and an ArrayList of the Stock objects (each CSV stores the data of each stock index for a 
+month so multiple Stock objects need to be created for each index). 
+
+DAY 2: 
+>Downloaded the JFreeChart APIs. Using this to display the opening and closing prices as a chart. A number 
+of difficulties arose from attempting to use this, as the Developer Guide is locked behind a $50 paywall. 
+StackOverflow and YouTube has been of limited help. Thanks to this, the jfreechart window is created and the 
+passed data is successfully displayed, although it is not the desired chart (there are multiple types that come 
+with this API). 
+>Problem: unable to render the jfreechart inside a JPanel tab. It can be rendered into JFrames but for some 
+reason, does not appear to work inside the tab (or any JPanel for that matter). Solution: don't pre-create 
+the tab (panel) inside the TabbedPane. Instead use addTab() to create a tab each time a stockMap item is 
+read. This way, the program can adapt and create only as many or as much tabs as needed depending on 
+how many CSVs there are. 
+>Located a developer guide for jfreechart and rewrote much of the chart from the previous day (multiple 
+times to see which chart rendered the data best). I settled for a TimeSeriesChart because it allowed me to 
+show multiple lines (good because I wanted to show the Opening price and Closing price. This would allow 
+the user to see the trend of both as well as see whether the index went up or down for that day). Other note:
+(Jfreechart has a ton of potential but is problematic for new users or those who don't have access to the dev 
+guide. They don't use the standard arrays/arrayLists that are included with Java. Instead, they have their own 
+libraries of arrays. Each chart seems to have their own type of library for storing data. Significant time wasted 
+in attempting to figure that out and experimenting with the dozens of data libraries before coming across the 
+developer guide. 
+
+DAY 3:
+>Attempted to tackle the issue of automatic downloading from Yahoo Finance. Downloaded the Apache 
+Commons API for the FileUtils functionality. Apparently it has a number of utilities, one of which is converting 
+strings to URLs. I thought this would resolve the 'unauthorized' error but again, came across the same error. 
+>Located a resource that will help get the online CSV retrieval working at: 
+http://blog.bradlucas.com/posts/2017-06-04-yahoo-finance-quote-download-java/
+Step 1: Download the Apache Commons HTTPClient API and the Apache Common Lang API. 

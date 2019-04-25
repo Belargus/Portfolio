@@ -1,0 +1,137 @@
+PORTFOLIO PLAN:
+>Demonstrate knowledge of creating GUIs. 
+>Demonstrate knowledge of SQL (or Derby SQL at least, although my knowledge is based off of PostgreSQL).
+>Demonstrate knowledge of object-oriented programming. Polymorphism, Encapsulation, Inheritance, 
+Abstraction (Creating classes for the users and tasks)
+>Demonstrate knowledge of how to problem-solve. (Creating calendar widget for GUI from scratch)
+>Demonstrate knowledge of how to import external libraries and how to use them. 
+
+<Not covered here>Demonstrate knowledge of how to connect to an online resource (i.e. website) and parse 
+the data. 
+<Not covered here>Demonstrate knowledge of networking concepts.
+<Not covered here>Demonstrate knowledge of multithreading concepts.
+
+PROJECT PLAN:
+>Create a management system that allows the user to add/update/delete/task users.
+>The data is to be stored on a SQL database. The choice of SQL will be Apache Derby as it can be 
+embedded into the program, thus forgoing the need to set up an external database. There will be 2 tables. 
+One table to store the users and their details (ID, first name, last name, job title, start/end dates, biological 
+sex, and a profile picture). Another table will store the tasks and its details (task ID, task details, start/end 
+dates, status, assigned user (designated by ID)). 
+>The management system will have a GUI that (ideally) consists of a single window that has multiple tabs in 
+lieu of opening/closing/navigating multiple windows. One tab will contain a table that displays all of the 
+stored users along with the details retrieved from the database. Tab 2 will also contain a table but of all the 
+past/current tasks in the database. Selecting a user in the first tab will narrow the results down to those tasks 
+assigned to that user. The third tab will contain a chart detailing the number of tasks that are completed per 
+week and like the previous tab, selecting a user will display the results for just that user. 
+>
+
+DAY 1:
+>The labels and textfields for user's details are aligned and variables renamed to be easily identified. 
+>The insert/update/delete buttons have also been added and renamed. 
+>The profile picture label has dimensions of 200x200 and the button to select the image was added. 
+>The panel for the tabs is created. Two tabs are created and each one contains a full size table. 
+>Each of the tables has had their column titles modified to properly represent the user and task details. 
+>The User and Task classes have been created. Constructors/getters/setters are complete for the Task class. 
+Currently deciding on how to deal with having an image as one of the fields. Should the image be stored in 
+the class? Or just the filepath?
+>SQL Helper class created. A method is created that will connect to the embedded SQL server and create the 
+tables. The Java DB driver has been imported into the library to allow the connection. 
+>>Issues encountered: the IF NOT EXISTS clause does not exists in Derby. Solution: Remove the clause.  
+Simply let SQL return the error and let the exception take care of it. If the table exists already, then it will 
+simply be caught. To prevent this from occurring with each attempt to connect to SQL, the table creation code 
+has been moved into a separate method of its own, to be called only when needed. 
+>>Issues encountered: the AUTOINCREMENT clause does not exist in Derby, it is MySQL-specific. Solution: 
+use GENERATED ALWAYS AS IDENTITY(START WITH 1, INCREMENT BY 1) is the Derby equivalent of the 
+PostgreSQL/MySQL clause. 
+>>Issues encountered: the SERIAL clause does not exist in Derby, it is a PostgreSQL-specific. 
+
+DAY 2:
+>Removing the picture from the first table, it will instead be on a separate table paired with foreign key of 
+user id. This way we can create the user without a picture and can still update it later. It can be retrieved using 
+a JOIN statement between the tables. 
+>Modifying the task and picture tables in SQL so that they accept the foreign key of user_id.
+>Numerous failures in attempting to retrieve a picture from the database. Unsure if the images was stored 
+properly, or if failure to retrieve correctly, or the images were never stored in the first place. Ongoing issue. 
+>The CONCAT clause does not work in Derby. Fix: use || to concatenate the results. 
+>Integer cannot be concatenated with String unless converted. CONVERT does not work. Derby equivalent is 
+CAST. CAST(user_id AS VARCHAR(10)). Correction: this does not work either. Must cast to CHAR. 
+>Search field added. Modified 'select users' to filter results based on query.
+>Created temporary insert/select methods for user_registry testing. Some of these methods generate 
+randomly generated values for the names, dates, jobs, sex fields. May or may not be included in the final 
+build. 
+>Method created to populate the user registry table in the GUI. Works as expected. 
+>The user_id serial is generating numbers that don't follow the typical incrementation of 1. It counts normally 
+from 1 to 10, but instead of 11 as the next number, it outputs 101 and continues in this fashion (102, 103...). 
+Ongoing issue to be fixed at a later time. 
+>insertUser(), updateUser(), and deleteUser() methods completed. The corresponding GUI buttons have had 
+their actionPerformed methods to call their methods when pressed. 
+>userregistry table modified so that clicking on a row will autocomplete the textfields, radiobuttons, and 
+combo box will the selected user's result. 
+
+DAY 3:
+>task_registry table filled with sampled data for testing. 
+>populateTable() method modified to work for any table, given that the JTable is supplied. 
+>The select, insert, update, and delete methods for the task_registry table have been completed. 
+>Decided to include a separate window for Task creation/update/delete because adding it to the main 
+window would make the window too large. Other ideas: create a task panel that overlays the user panel but 
+only allow one panel to be visible at a time, to be toggled on or off by pressing a button. 
+
+DAY 4:
+>Severe issue populating the task_registry table on command. It will not update on prompt. The 
+user_registry seems to update just fine however. Fixed. Removed code that caused a stack overflow. I created 
+an instance of the main GUI page (PersonnelManagerGUI) in the SQLHelper as well as creating an instance of 
+the SQLHelper in the main GUI code. The former was a temporary fix that should've been replaced with a 
+long-term solution. Issue is now resolved. 
+>populateTable() method removed from the GUIs and placed within the SQLHelper. Rather than having 
+multiple copies of this method in each GUI, it can now simply be called from the SQLHelper class. 
+>Task GUI is now complete. The insert, update, and delete buttons all call the corresponding sql methods 
+when pressed. 
+>Clicking on a row in the task_registry table will autofill the TaskGUI window (if open). May include method to 
+detect if the task GUI window is open. But that is for a later time. 
+>Modified the Personnelmanager and Task GUIs to grab the focus on the firstname and task details, 
+respectively.
+>Added a FileChooser to the PM GUI to allow selection of a image. Coded this method to modify the size 
+of the image to fix into the label_image box. Not doing so caused large images to distort the entire GUI. 
+
+DAY 5:
+>Created the select/insert/update/delete methods for the user_picture registry. Significant issues 
+encountered in attempting to figure out the best way to store an image into SQL and more issues in how to 
+render the data back into usable form. Initially, the thought was to store using the setBlob() method but that 
+was changed in favor of using setBinaryStream(), but to use BinaryStream, the data has to go through a 
+FileInputStream first. To retrieve the image, the getBinaryStream() method was used. To write the data, a 
+ByteArrayOutputStream() was needed. After that a ToolKit was need to create an Image which then has to be 
+converted to an ImageIcon. It was not until later that I found a different method using the getBlob() method 
+which simplifies the process to simply: 
+Blob blob = rs.getBlob(1);
+ImageIcon imageIcon = new ImageIcon(Blob.getBytes(1, Blob.length()));
+2 lines instead of the 8 lines of code. 
+>Added code to .close() any PreparedStatement and Connection. Recommended by users on StackOverflow 
+and Dzone. Reasoning being that it releases the resources for other applications to use. 
+>Issue encountered: unable to create a new user WITH a picture. This is due to the user_registry requiring a 
+user_id. Since the user has not been created yet, there is no user_id to use. There is a workaround involving 
+retrieving the user_id after the user has been created... this is not preferred. Alternatively, can modify the 
+user_picture table to remove the NOT NULL clause from user_id, but attempting to locate the picture would 
+be difficult. Is it possible to insert the new user AND the picture using the same statement? If this is possible, 
+maybe it is also possible to copy the automatically generated serial from the user into the picture query. 
+A more likely solution is to have the insert user statement return a value (the automatically-generated user_id) 
+and use that... And this is the solution. Use the RETURNING user_id in the INSERT statement to get back this 
+value. Not a solution, at least not for Derby SQL, the RETURNING clause is not supported... An actual solution 
+found in: https://stackoverflow.com/questions/4894754/retrieve-id-of-record-just-inserted-into-a-java-db-derby-database
+
+DAY 6:
+>Modified the user_pictures table so that the user_id column only accepts unique values. Initially, it was 
+intended to allow a user to have multiple pictures throughout their employment but that would require 
+adding an additional column and likely additional labels to show all the pictures. Instead, only one picture will 
+be stored per user_id and can be updated as needed. 
+>Modified the insert/update methods for user to also update the user_pictures table. 
+>Derby does not have a FULL OUTER JOIN. The closest equivalent is NATURAL JOIN. Abandoning this in favor 
+or using multiple SQL queries. The problem with JOIN is that if there is no match, then nothing at all is 
+returned.
+>Modified the user_id textfield to search for user_registry row that contains that information. Once found, the 
+name, date, job, etc.. fields are filled out. 
+>Created the select
+>Created the displayPicture(ImageIcon) method that utilizes the selectUserPicture(int) to supply the image. 
+>selectUser(int) has been modified so that it an Object[] instead of an ArrayList. This was done because this 
+method will only ever return a single row. It makes no sense to make an array of 1 and store it in another 
+array.
